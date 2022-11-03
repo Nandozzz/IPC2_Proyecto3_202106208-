@@ -302,3 +302,19 @@ def obtener_clientes():
             json.append(instancia)
 
     return jsonify(json),200
+
+
+@app.route('/crear_recursos',methods=['POST'])
+def crear_recursos():
+    json=request.get_json()
+    existe=False
+
+    for i in lista_recursos:
+        if(json['id']==i.id):
+            existe=True
+
+    if(existe==False):
+        lista_recursos.append(Recursos(json['id'],json['nombre'],json['abreviatura'],json['metrica'], json['tipo'],json['valor_hora']))
+        return jsonify({'ok':True, 'data':'Recurso añadida con exito'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Id ingresada, ya esta registrada '}),200      
