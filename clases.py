@@ -5,6 +5,7 @@ class Categoria:
         self.descripcion=descripcion
         self.cargaTrabajo=cargaTrabajo
         self.lista_configuraciones=[]
+        self.montoTotal=0
 
 class Configuracion:
     def __init__(self, id, nombre, descripcion):
@@ -12,6 +13,7 @@ class Configuracion:
         self.nombre=nombre
         self.descripcion=descripcion
         self.lista_recursos=[]
+        self.montoTotal=0
 
 class RecursosC:
     def __init__(self, id,cantidad):

@@ -26,7 +26,7 @@ CORS(app)
 
 @app.route('/')
 def home():
-    return "Los alumnos de IPC2 B van a ganar"
+    return "Gracias por todo Jacky :)"
 
 @app.route('/autor')
 def autor():
@@ -431,6 +431,8 @@ def crear_instancia():
 
 @app.route('/facturacion',methods=['POST'])
 def facturacion():
+    global lista_confi
+    lista_confi = []
     json=request.get_json()
     existe=False
     no_factura=10000000000000
@@ -479,8 +481,9 @@ def facturacion():
                 for confi in c.lista_configuraciones:
                     
                     if(confi.id == instancia.id_configuracion):
-                        
+                        categoriaC=c
                         configuracion=confi
+                        lista_confi.append(configuracion)
 
             texto+="    Instancia: "+instancia.id+"\n"
             texto+="    Tiempo: "+Tiempoi+"\n"
@@ -499,12 +502,14 @@ def facturacion():
                         aporte=(float(recurso.valor_hora))*(float(Tiempoi))*(float(r.cantidad))
                         monto=monto+aporte
                         texto+="      Aporte: "+str(aporte)+"\n"
-                        recurso.montoTotal=recurso.montoTotal+aporte
+                        recurso.montoTotal=recurso.montoTotal+float(aporte)
                         obejto_F.recursos.append(r)
 
 
             texto+="------------------------------------------------------------\n"
             obejto_F.monto=monto
+            configuracion.montoTotal=configuracion.montoTotal+float(monto)
+            categoriaC.montoTotal=categoriaC.montoTotal+float(monto)
             texto+="    MontoTotal: "+str(monto)+"\n"
 
 
@@ -590,8 +595,46 @@ def reporterecursos():
     Archivol.close    
 
     return jsonify({'ok':False, 'data':'Reporte Generado'}),200   
-    
 
+
+
+@app.route('/reporteestadisticas',methods=['GET'])
+def reporteestadisticas():
+    global lista_confi
+    lista=lista_categorias
+
+    texto=""
+    texto+="Lista de Categorias\n"
+    lista2=sorted(lista, reverse=True, key=lambda recurso : recurso.montoTotal)
+    for r in lista2:
+        print(r.montoTotal)
+
+        texto+="Nombre: "+str(r.nombre)+"\n"
+        texto+="ID: "+str(r.id)+"\n"
+        texto+="Monto: "+str(r.montoTotal)+"\n"
+        texto+="------------------------------------------------------------\n"
+        texto+="\n"
+
+    lista3=lista_confi
+
+    texto+="Lista de Categorias\n"
+    lista4=sorted(lista3, reverse=True, key=lambda recurso : recurso.montoTotal)
+    for r in lista4:
+        print(r.montoTotal)
+
+        texto+="Nombre: "+str(r.nombre)+"\n"
+        texto+="ID: "+str(r.id)+"\n"
+        texto+="Monto: "+str(r.montoTotal)+"\n"
+        texto+="------------------------------------------------------------\n"
+        texto+="\n"    
+
+
+
+    Archivol=open(r"Reporte Estadistica.pdf","w", encoding="utf-8") 
+    Archivol.write(texto)
+    Archivol.close    
+
+    return jsonify({'ok':False, 'data':'Reporte Generado'}),200   
 
 
 
