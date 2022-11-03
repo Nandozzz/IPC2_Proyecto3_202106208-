@@ -186,3 +186,40 @@ def readXML():
                     Objeto_Cliente.lista_instancias.append(Instancias(instancia.getAttribute("id"),idConfi.childNodes[0].data, nombreInstancia.childNodes[0].data, FechaINICIO, estado.childNodes[0].data, FechaFINAL))
                             
     return jsonify({'ok':True,'data':'Datos cargados con exito'}),200                      
+
+
+
+@app.route('/cargarArchivoConsumos',methods=['POST'])
+def readXML2():
+    ruta=request.data.decode('utf-8')
+    
+    global lista_recursos, lista_categorias, lista_clientes, lista_consumos
+    lista_consumos = []
+    domTree = parseString(ruta)
+    rootNode = domTree.documentElement
+    #print(rootNode.nodeName)
+
+    consumos= rootNode.getElementsByTagName("consumo")
+    for recurso in consumos:
+        if recurso.hasAttribute("nitCliente") and recurso.hasAttribute("idInstancia"):
+            print("Nit:",recurso.getAttribute("nitCliente"))
+            print("Id Instancia:",recurso.getAttribute("idInstancia"))
+            # elemento de nombre
+            tiempo = recurso.getElementsByTagName("tiempo")[0]
+            print(tiempo.nodeName, ":", tiempo.childNodes[0].data)
+            # elemento telefónico
+
+            fechaHora = recurso.getElementsByTagName("fechaHora")[0]
+            prog = re.compile(r'(\d{2})/(\d{2})/(\d{4})')
+            result = prog.search(str(fechaHora.childNodes[0].data))
+            if result!=None:
+                FechaHORA=result.group()
+                print(fechaHora.nodeName, ":", result.group())
+            else:
+                print(fechaHora.nodeName, ":", fechaHora.childNodes[0].data, "NADA")
+                FechaHORA=None 
+
+            lista_consumos.append(Consumos(recurso.getAttribute("nitCliente"),recurso.getAttribute("idInstancia"), tiempo.childNodes[0].data, FechaHORA))    
+
+
+    return jsonify({'ok':True,'data':'Datos cargados con exito'}),200 
