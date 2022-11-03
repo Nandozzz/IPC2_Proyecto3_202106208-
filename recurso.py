@@ -6,3 +6,5 @@ class Recursos:
         self.metrica = metrica
         self.tipo = tipo
         self.valor_hora = valor_hora
+
+        self.montoTotal=0

@@ -491,6 +491,7 @@ def facturacion():
                 for r2 in lista_recursos:
                     if(r.id==r2.id):
                         recurso=r2
+
                         texto+="\n"
                         texto+="      Codigo: "+recurso.id+"\n"
                         texto+="      Nombre: "+recurso.nombre+ ""+recurso.metrica+"\n"
@@ -498,6 +499,7 @@ def facturacion():
                         aporte=(float(recurso.valor_hora))*(float(Tiempoi))*(float(r.cantidad))
                         monto=monto+aporte
                         texto+="      Aporte: "+str(aporte)+"\n"
+                        recurso.montoTotal=recurso.montoTotal+aporte
                         obejto_F.recursos.append(r)
 
 
@@ -564,6 +566,33 @@ def reportefactura():
         return jsonify({'ok':False, 'data':'Reporte de Factura Generada'}),200 
     else:
         return jsonify({'ok':False, 'data':'Error al ingresar datos'}),200 
+
+
+@app.route('/reporterecursos',methods=['GET'])
+def reporterecursos():
+
+    lista=lista_recursos
+
+    texto=""
+    texto+="Lista de Recursos mas cotizados\n"
+    lista2=sorted(lista, reverse=True, key=lambda recurso : recurso.montoTotal)
+    for r in lista2:
+        print(r.montoTotal)
+
+        texto+="Nombre: "+str(r.nombre)+"\n"
+        texto+="ID: "+str(r.id)+"\n"
+        texto+="Monto: "+str(r.montoTotal)+"\n"
+        texto+="------------------------------------------------------------\n"
+        texto+="\n"
+
+    Archivol=open(r"Reporte Recursos.pdf","w", encoding="utf-8") 
+    Archivol.write(texto)
+    Archivol.close    
+
+    return jsonify({'ok':False, 'data':'Reporte Generado'}),200   
+    
+
+
 
 
 if __name__ == "__main__":
