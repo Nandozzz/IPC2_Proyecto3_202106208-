@@ -519,3 +519,52 @@ def facturacion():
 
 
     return jsonify({'ok':False, 'data':'Facturas Generadas'}),200    
+
+
+@app.route('/reportefactura',methods=['POST'])
+def reportefactura():
+    json=request.get_json()
+
+    existe=False
+    existe2=False
+
+    for k in lista_clientes:
+        if(k.nit ==json['Nit_cliente']):
+            usuario=k
+            existe=True
+
+    for f in usuario.lista_facturas:
+        if(f.id==json['No_factura']):
+            existe2=True
+            factura=f
+
+    
+    if(existe==True) and (existe2==True):
+        texto=""
+        texto+="\nFACTURA-"+str(factura.id)+"\n"
+        texto+="Fecha de Facturacion: "+str(factura.fecha)+"\n"
+        texto+="Nit cliente: "+str(factura.cliente)+"\n"
+
+        texto+="    Instancia: "+str(factura.instancia)+"\n"
+        texto+="    Tiempo: "+str(factura.tiempo)+"\n"
+        texto+="------------------------------------------------------------\n"
+
+        for a in factura.recursos:
+            texto+="      Id: "+str(a.id)+"\n"
+            texto+="      Cantidad: "+str(a.cantidad)+"\n"
+
+        texto+="------------------------------------------------------------\n"
+        texto+="    MontoTotal: "+str(factura.monto)+"\n"    
+
+
+        Archivol=open(r"Reporte Factura-"+str(factura.id)+".pdf","w", encoding="utf-8") 
+        Archivol.write(texto)
+        Archivol.close
+
+        return jsonify({'ok':False, 'data':'Reporte de Factura Generada'}),200 
+    else:
+        return jsonify({'ok':False, 'data':'Error al ingresar datos'}),200 
+
+
+if __name__ == "__main__":
+    app.run(debug=True)      
