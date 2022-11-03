@@ -427,3 +427,95 @@ def crear_instancia():
         return jsonify({'ok':True, 'data':'Configuracion añadida con exito a categoria'}),200
     else:
         return jsonify({'ok':False, 'data':'Ocurrio un problema al momento de ingresar la informacion'}),200     
+
+
+@app.route('/facturacion',methods=['POST'])
+def facturacion():
+    json=request.get_json()
+    existe=False
+    no_factura=10000000000000
+    
+    
+
+    Inicio_rango=json['FechaInicioR']
+    No_rangoI=Inicio_rango.split("/")
+    fecha1 = datetime.date(int(No_rangoI[2]), int(No_rangoI[1]), int(No_rangoI[0]))
+    
+    Fin_rango=json['FechaFinR']
+    No_rangoF=Fin_rango.split("/")
+    fecha2 = datetime.date(int(No_rangoF[2]), int(No_rangoF[1]), int(No_rangoF[0]))
+    
+
+    for i in lista_consumos:
+        print(i.nitCliente)
+        print(i.fechaHora)
+        texto=""
+        monto=0
+        Fecha_c=i.fechaHora
+        No_Fechac=Fecha_c.split("/")
+        Fecha_Consumo = datetime.date(int(No_Fechac[2]), int(No_Fechac[1]), int(No_Fechac[0]))
+
+        Tiempoi=i.tiempo
+        
+        texto+="\nFACTURA-"+str(no_factura)+"\n"
+        texto+="Fecha de Facturacion: "+json['FechaFinR']+"\n"
+        for k in lista_clientes:
+            if(k.nit ==i.nitCliente):
+                usuario=k
+        texto+="Nit cliente: "+usuario.nit+"\n"
+
+        if(Fecha_Consumo>=fecha1) and (Fecha_Consumo<=fecha2):
+            
+
+            for l in usuario.lista_instancias:
+                if(l.id ==i.idInstancia):
+                    instancia=l
+            
+
+            for c in lista_categorias:
+                
+                instancia.id_configuracion=instancia.id_configuracion.replace(" ", "") 
+
+                for confi in c.lista_configuraciones:
+                    
+                    if(confi.id == instancia.id_configuracion):
+                        
+                        configuracion=confi
+
+            texto+="    Instancia: "+instancia.id+"\n"
+            texto+="    Tiempo: "+Tiempoi+"\n"
+            texto+="------------------------------------------------------------\n"
+            obejto_F=Factura(str(no_factura), json['FechaFinR'],0,instancia.id,usuario.nit,Tiempoi)
+
+            for r in configuracion.lista_recursos:
+                for r2 in lista_recursos:
+                    if(r.id==r2.id):
+                        recurso=r2
+                        texto+="\n"
+                        texto+="      Codigo: "+recurso.id+"\n"
+                        texto+="      Nombre: "+recurso.nombre+ ""+recurso.metrica+"\n"
+                        texto+="      Cantidad: "+r.cantidad+"\n"
+                        aporte=(float(recurso.valor_hora))*(float(Tiempoi))*(float(r.cantidad))
+                        monto=monto+aporte
+                        texto+="      Aporte: "+str(aporte)+"\n"
+                        obejto_F.recursos.append(r)
+
+
+            texto+="------------------------------------------------------------\n"
+            obejto_F.monto=monto
+            texto+="    MontoTotal: "+str(monto)+"\n"
+
+
+
+            usuario.lista_facturas.append(obejto_F)
+            Archivol=open(r"Factura Global-"+usuario.nit+".pdf","a", encoding="utf-8") 
+            Archivol.write(texto)
+            Archivol.close
+
+            no_factura+=1
+        else:
+            print("no entra")
+            print("\n")
+
+
+    return jsonify({'ok':False, 'data':'Facturas Generadas'}),200    
