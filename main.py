@@ -318,3 +318,112 @@ def crear_recursos():
         return jsonify({'ok':True, 'data':'Recurso añadida con exito'}),200
     else:
         return jsonify({'ok':False, 'data':'Id ingresada, ya esta registrada '}),200      
+
+
+@app.route('/crear_categorias',methods=['POST'])
+def crear_categorias():
+    json=request.get_json()
+    existe=False
+
+    for i in lista_categorias:
+        if(json['id']==i.id):
+            existe=True
+
+    if(existe==False):
+        lista_categorias.append(Categoria(json['id'],json['nombre'],json['descripcion'],json['cargaTrabajo']))
+        return jsonify({'ok':True, 'data':'Categoria añadida con exito'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Id ingresada, ya esta registrada '}),200   
+
+@app.route('/crear_configuraciones',methods=['POST'])
+def crear_configuraciones():
+    json=request.get_json()
+    existe=False
+    existe2=False
+
+    for i in lista_categorias:
+        if(json['id_categoria']==i.id):
+            objeto=i
+            existe=True
+
+    if(existe==True):
+        for j in objeto.lista_configuraciones:
+            if(j.id==json['id']):
+                existe2=True        
+
+    if(existe==True) and (existe2==False):
+        objeto.lista_configuraciones.append(Configuracion(json['id'],json['nombre'],json['descripcion']))
+        return jsonify({'ok':True, 'data':'Configuracion añadida con exito a categoria'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Ocurrio un problema al momento de ingresar la informacion'}),200   
+
+@app.route('/crear_recursosconfiguracio',methods=['POST'])
+def crear_recursosconfiguracio():
+    json=request.get_json()
+    existe=False
+    existe2=False
+    existe3=False
+
+    for i in lista_categorias:
+        if(json['id_categoria']==i.id):
+            objeto=i
+            existe=True
+
+    if(existe==True):
+        for j in objeto.lista_configuraciones:
+            if(j.id==json['id_configuracion']):
+                objetocategoria=j
+                existe2=True       
+
+    if(existe2==True):
+        for k in objetocategoria.lista_recursos:
+            if(k.id==json['id']):
+                existe3=True       
+
+
+    if(existe==True) and (existe2==True) and (existe3==False):
+        objetocategoria.lista_recursos.append(RecursosC(json['id'],json['cantidad']))
+        return jsonify({'ok':True, 'data':'Recurso añadido con exito a configuracion'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Ocurrio un problema al momento de ingresar la informacion'}),200   
+
+
+
+
+
+@app.route('/crear_clientes',methods=['POST'])
+def crear_clientes():
+    json=request.get_json()
+    existe=False
+
+    for i in lista_clientes:
+        if(i.nit==json['nit']):
+            existe=True
+
+    if(existe==False):
+        lista_clientes.append(Usuario(json['nit'],json['nombre'],json['usuario'],json['clave'], json['direccion'],json['correo']))
+        return jsonify({'ok':True, 'data':'Cliente añadido con exito'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Nit ingresada, ya esta registrada'}),200     
+
+@app.route('/crear_instancia',methods=['POST'])
+def crear_instancia():
+    json=request.get_json()
+    existe=False
+    existe2=False
+
+    for i in lista_clientes:
+        if(json['id_cliente']==i.id):
+            objeto=i
+            existe=True
+
+    if(existe==True):
+        for j in objeto.lista_instancias:
+            if(j.id==json['id']):
+                existe2=True        
+
+    if(existe==True) and (existe2==False):
+        objeto.lista_instancias.append(Instancias(json['id'],json['id_configuracion'],json['nombre'],json['fecha_inicio'],json['estado'],json['fecha_final']))
+        return jsonify({'ok':True, 'data':'Configuracion añadida con exito a categoria'}),200
+    else:
+        return jsonify({'ok':False, 'data':'Ocurrio un problema al momento de ingresar la informacion'}),200     
