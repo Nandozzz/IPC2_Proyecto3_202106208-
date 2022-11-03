@@ -31,3 +31,158 @@ def home():
 @app.route('/autor')
 def autor():
     return "Dwight Fenando Gabriel Chinchilla Hernandez - 202106208"
+
+
+@app.route('/cargarArchivo',methods=['POST'])
+def readXML():
+    ruta=request.data.decode('utf-8')
+    
+    global lista_recursos, lista_categorias, lista_clientes, lista_consumos
+    lista_recursos = []
+    lista_categorias = []
+    lista_clientes = []
+    domTree = parseString(ruta)
+    rootNode = domTree.documentElement
+    #print(rootNode.nodeName)
+
+    lrecursos= rootNode.getElementsByTagName("listaRecursos")
+    print("\n Lista Recursos")
+    for lrecursor in lrecursos:
+
+        recursos= lrecursor.getElementsByTagName("recurso")
+        for recurso in recursos:
+            if recurso.hasAttribute("id") and recurso.getElementsByTagName("metrica")!=None:
+                print("ID:",recurso.getAttribute("id"))
+                # elemento de nombre
+                nombre = recurso.getElementsByTagName("nombre")[0]
+                print(nombre.nodeName, ":", nombre.childNodes[0].data)
+                # elemento telefónico
+                abreviatura = recurso.getElementsByTagName("abreviatura")[0]
+                print(abreviatura.nodeName, ":", abreviatura.childNodes[0].data)
+
+                metrica = recurso.getElementsByTagName("metrica")[0]
+                print(metrica.nodeName, ":", metrica.childNodes[0].data)
+
+                tipo = recurso.getElementsByTagName("tipo")[0]
+                print(tipo.nodeName, ":", tipo.childNodes[0].data)
+                
+                valorXhora = recurso.getElementsByTagName("valorXhora")[0]
+                print(valorXhora.nodeName, ":", valorXhora.childNodes[0].data)
+                valorH=valorXhora.childNodes[0].data.replace(" ", "")
+                
+                lista_recursos.append(Recursos(recurso.getAttribute("id"), nombre.childNodes[0].data, abreviatura.childNodes[0].data,  metrica.childNodes[0].data, tipo.childNodes[0].data,valorH))
+
+
+    print("\n Lista Categorias")
+    categorias= rootNode.getElementsByTagName("categoria")
+    for categoria in categorias:
+        if categoria.hasAttribute("id"):
+            print("ID:",categoria.getAttribute("id"))
+            # elemento de nombre
+            nombreC = categoria.getElementsByTagName("nombre")[0]
+            print(nombreC.nodeName, ":", nombreC.childNodes[0].data)
+            # elemento telefónico
+            descripcion = categoria.getElementsByTagName("descripcion")[0]
+            print(descripcion.nodeName, ":", descripcion.childNodes[0].data)
+
+            cargaTrabajo = categoria.getElementsByTagName("cargaTrabajo")[0]
+            print(cargaTrabajo.nodeName, ":", cargaTrabajo.childNodes[0].data)
+
+            Objeto_Categoria=Categoria(recurso.getAttribute("id"), nombreC.childNodes[0].data, descripcion.childNodes[0].data, cargaTrabajo.childNodes[0].data)
+            lista_categorias.append(Objeto_Categoria)
+
+            configuraciones= categoria.getElementsByTagName("configuracion")
+            
+            #print("\nLista de Puntos")
+            for configuracion in configuraciones:
+                if configuracion.hasAttribute("id"):
+                    print("ID:", configuracion.getAttribute("id"))
+
+                    nombreConfi = configuracion.getElementsByTagName("nombre")[0]
+                    print(nombreConfi.nodeName, ":", nombreConfi.childNodes[0].data)
+
+                    descripcionConfi = configuracion.getElementsByTagName("descripcion")[0]
+                    print(descripcionConfi.nodeName, ":", descripcionConfi.childNodes[0].data)
+
+                    Objeto_Configuracion = Configuracion(configuracion.getAttribute("id"),nombreConfi.childNodes[0].data,descripcionConfi.childNodes[0].data)
+
+                    Objeto_Categoria.lista_configuraciones.append(Objeto_Configuracion)
+
+
+
+                    #print("DATOS DE SUCURSAL CARGADOS CORRECTAMENTE")
+                    recursos= configuracion.getElementsByTagName("recurso")
+                    #print("\nLista de Escritorios")
+                    for recurso in recursos:
+                        
+                        if recurso.hasAttribute("id"):
+                            print("ID:", recurso.getAttribute("id"))
+
+                            cantidad = recurso.childNodes[0].data
+                            print(recurso.nodeName, ":", recurso.childNodes[0].data)
+
+                            Objeto_Configuracion.lista_recursos.append(RecursosC(recurso.getAttribute("id"),recurso.childNodes[0].data))
+
+
+    clientes= rootNode.getElementsByTagName("cliente")
+    for cliente in clientes:
+        if cliente.hasAttribute("nit"):
+            print("NIT:",cliente.getAttribute("nit"))
+            # elemento de nombre
+            nombreCliente = cliente.getElementsByTagName("nombre")[0]
+            print(nombreCliente.nodeName, ":", nombreCliente.childNodes[0].data)
+
+            usuario = cliente.getElementsByTagName("usuario")[0]
+            print(usuario.nodeName, ":", usuario.childNodes[0].data)
+
+            clave = cliente.getElementsByTagName("clave")[0]
+            print(clave.nodeName, ":", clave.childNodes[0].data)
+
+            direccion = cliente.getElementsByTagName("direccion")[0]
+            print(direccion.nodeName, ":", direccion.childNodes[0].data)  
+
+            correo = cliente.getElementsByTagName("correoElectronico")[0]
+            print(correo.nodeName, ":", correo.childNodes[0].data) 
+
+            Objeto_Cliente=Usuario(cliente.getAttribute("nit"), nombreCliente.childNodes[0].data, usuario.childNodes[0].data, clave.childNodes[0].data, direccion.childNodes[0].data, correo.childNodes[0].data)
+            lista_clientes.append(Objeto_Cliente)
+
+            instancias= cliente.getElementsByTagName("instancia") 
+
+            for instancia in instancias:
+                if instancia.hasAttribute("id"):
+                    print("ID:", instancia.getAttribute("id"))
+
+                    idConfi = instancia.getElementsByTagName("idConfiguracion")[0]
+                    print(idConfi.nodeName, ":", idConfi.childNodes[0].data)
+
+                    nombreInstancia = instancia.getElementsByTagName("nombre")[0]
+                    print(nombreInstancia.nodeName, ":", nombreInstancia.childNodes[0].data)
+
+                    fechaInicio = instancia.getElementsByTagName("fechaInicio")[0]
+                    prog = re.compile(r'(\d{2})/(\d{2})/(\d{4})')
+                    result = prog.search(str(fechaInicio.childNodes[0].data))
+                    if result!=None:
+                        FechaINICIO=result.group()
+                        print(fechaInicio.nodeName, ":", result.group())
+                    else:
+                        print(fechaFinal.nodeName, ":", fechaInicio.childNodes[0].data, "NADA")
+                        FechaINICIO=None 
+                    
+
+                    estado = instancia.getElementsByTagName("estado")[0]
+                    print(estado.nodeName, ":", estado.childNodes[0].data)
+
+                    fechaFinal = instancia.getElementsByTagName("fechaFinal")[0]
+                    prog2 = re.compile(r'(\d{2})/(\d{2})/(\d{4})')
+                    fechaFinal_Re = prog2.search(str(fechaFinal.childNodes[0].data))
+                    if fechaFinal_Re!=None:
+                        FechaFINAL=fechaFinal_Re.group()
+                        print(fechaFinal.nodeName, ":", fechaFinal_Re.group())
+                    else:
+                        print(fechaFinal.nodeName, ":", fechaFinal.childNodes[0].data, "NADA")
+                        FechaFINAL=None 
+
+                    Objeto_Cliente.lista_instancias.append(Instancias(instancia.getAttribute("id"),idConfi.childNodes[0].data, nombreInstancia.childNodes[0].data, FechaINICIO, estado.childNodes[0].data, FechaFINAL))
+                            
+    return jsonify({'ok':True,'data':'Datos cargados con exito'}),200                      
