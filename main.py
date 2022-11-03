@@ -223,3 +223,82 @@ def readXML2():
 
 
     return jsonify({'ok':True,'data':'Datos cargados con exito'}),200 
+
+
+
+@app.route('/recursos',methods=['GET'])
+def obtener_recursos():
+    global lista_recursos, lista_categorias, lista_clientes
+    json=[]
+    for i in lista_recursos:
+        recurso={
+            'id':i.id,
+            'nombre':i.nombre,
+            'abreviatura':i.abreviatura,
+            'metrica':i.metrica,
+            'tipo':i.tipo,
+            'valor_hora ':i.valor_hora 
+        }
+        json.append(recurso)
+
+    return jsonify(json),200
+
+@app.route('/categorias',methods=['GET'])
+def obtener_categorias():
+    global lista_recursos, lista_categorias, lista_clientes
+    json=[]
+    for i in lista_categorias:
+        categoria={
+            'N':'Categoria',
+            'id':i.id,
+            'nombre':i.nombre,
+            'descripcion':i.descripcion,
+            'cargaTrabajo':i.cargaTrabajo,
+        }
+        json.append(categoria)
+
+        for j in i.lista_configuraciones:
+            configuracion={
+                'N':'Configuracion',
+                'id':j.id,
+                'nombre':j.nombre,
+                'descripcion':j.descripcion,
+            }
+            json.append(configuracion)
+
+            for k in j.lista_recursos:
+                recurso={
+                    'N':'Recurso',
+                    'id':k.id,
+                    'cantidad':k.cantidad
+                }
+                json.append(recurso)
+
+    return jsonify(json),200
+
+@app.route('/clientes',methods=['GET'])
+def obtener_clientes():
+    global lista_recursos, lista_categorias, lista_clientes
+    json=[]
+    for i in lista_clientes:
+        cliente={
+            'N':'Cliente',
+            'nit':i.nit,
+            'nombre':i.nombre,
+            'usuario':i.usuario
+        }
+        json.append(cliente)
+
+        for j in i.lista_instancias:
+            instancia={
+                'N':'Instancia',
+                'id':j.id,
+                'id_configuracion':j.id_configuracion,
+                'nombre':j.nombre,
+                'fecha_inicio':j.fecha_inicio,
+                'estado':j.estado,
+                'fecha_final':j.fecha_final
+            }
+            json.append(instancia)
+
+    return jsonify(json),200
