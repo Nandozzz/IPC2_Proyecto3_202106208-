@@ -22,3 +22,12 @@ from clases import *
 app=Flask(__name__)
 app.config["DEBUG"]=True
 CORS(app)
+
+
+@app.route('/')
+def home():
+    return "Los alumnos de IPC2 B van a ganar"
+
+@app.route('/autor')
+def autor():
+    return "Dwight Fenando Gabriel Chinchilla Hernandez - 202106208"
